@@ -2,6 +2,25 @@
 
 Notes for myself, focused on the Solutions Architect Professional Exam.
 
+# Table of Contents
+- [aws-certification-notes](#aws-certification-notes)
+- [AWS Accounts](#aws-accounts)
+  * [Budgets](#budgets)
+- [IAM](#iam)
+  * [Policy Evaluation](#policy-evaluation)
+  * [Advanced Identities and Federation](#advanced-identities-and-federation)
+    + [SAML 2.0 Identity Federation](#saml-20-identity-federation)
+    + [AWS SSO](#aws-sso)
+- [Amazon Cognito](#amazon-cognito)
+- [AWS Organizations](#aws-organizations)
+- [AWS Resources Access Manager (RAM)](#aws-resources-access-manager-ram)
+- [Service Quotas](#service-quotas)
+- [Amazon Workspaces](#amazon-workspaces)
+- [AWS Directory Service](#aws-directory-service)
+- [Advanced VPCs](#advanced-vpcs)
+  * [DHCP](#dhcp)
+- [Encryption Fundamentals](#encryption-fundamentals)
+
 # AWS Accounts
 
 * Billing & Cost Management Dashboard or “My Billing Dashboard” has quick links to billing and cost management products.
@@ -151,6 +170,55 @@ Notes for myself, focused on the Solutions Architect Professional Exam.
   * In the event you want to roll your own custom DNS servers, you do this with DHCP option sets
 ![image](https://user-images.githubusercontent.com/9027551/151608085-15d7c76c-1cfe-4a9a-a1b7-183fceec364d.png)
 
+## VPC Router
+* Every VPC is created with a Main route table (RT) - the default RT for every subnet in the VPC
+* Custom route tables be created and associated with subnets in the VPC - removing the association between those subnets and the main RT
+* Keep in mind that subnets are only associated with exactly one RT. This means that deassociating a custom RT retores the association with the main RT
+* Routes can be associated with IPs or AWS resources (including gateways)
+
+## NACLs
+* Affect subnets, not components within
+* Rules can only target IPs/CIDR, ports and protocols, not logical resources
+* Stateless
+* Rules are processed by rule number order, rather than by specificity
+* The default NACL is allow all
+* Custom NACL by default is deny all
+* A NACL can be associated with multiple subnets, but a sunbet can only have one NACL
+
+## Security Groups (SGs)
+* Stateful
+* No explicity deny, meaning SGs can't be used to block specific IPs
+* Unlike NACLs, also supports logical resources, including SGs and gateways
+
+## Border Gateway Protocol (high level)
+* Useful for dynamic route discovery
+* DX and Dynamic VPNs utilize this
+* Composed of Autonomous Systems (AS) -- single blackbox networks. 
+ * Each is assigned an ASN. Public and private ASNs are available.
+* Operates over tcp/179
+* Peering between AS's is manually configured
+* After being peered, AS's will communicate network topology and communicate its findings with its other peers. Specifically it communicates shortest paths (by AS hops).
+
+## VPNs
+* AWS Site-to-Site VPN is a logical connection between a VPC and an on-premises network ecrypted using IPSec
+* VPN connections and VPGW are limited to 1.25Gbps.
+![image](https://user-images.githubusercontent.com/9027551/151620999-1572c3c4-373c-4f06-84bd-a655171e7537.png)
+* Accelerated Site-to-Site VPN has a fixed accerlator cost plus a transfer fee. Also can only be used with TGW attachments, not VGWs.
+
+# Transit Gateway
+* Can be attached to VPCs, VPGWs (site-to-site vpn), and DXGWs.
+* Has a route table which, by default, contains all BGP-learned and VPC routes. This means all attachments can communicate to all other attachments!
+* You can peer TGWs with other TGWs. However, they won't share routes. Use static routes to achievement communication. Inter-region and account possible. Much like VPC peering, traffic is encrypted over the AWS network.
+* You can configure additional route tables. Specifically, you can configure specific attachements to 
+ * propogate connections to these route tables and/or
+ * use these route tables
+* Route tables can be assigned to VGWs and IGWs too! Ex. rerouting all incoming traffic to a security appliance
+
+# Direct Connect
+* Private VIF - connects a single VGW to a DX Gateway
+* Private VIF => DX Gateway => Transit Gateways = conenct private VIF to multiple VPCs in multiple regions
+* Remember that DXGW can only be used for VPCS & Private VIFs ... OR ... TGW and a Transit VIF .. NOT BOTH
+* Each transit VIF supports up to 3 TGWs
 
 # Encryption Fundamentals
   * Symmetric Encryption -- Both parties use the same algorithm and secret key to encrypt/decrypt data. 
@@ -161,5 +229,24 @@ Notes for myself, focused on the Solutions Architect Professional Exam.
     * Party 2 uses party 1’s public key to generate ciphertext. Party 1 can then decrypt using its own private key.
     * Usually a single key is communicated and agreed upon using asymmetric encryption so that the connection can be switched to using symmetric encryption (part of SSL/TLS)
   * Signing - Party 2 uses its private key to sign a message. Party 1 uses Party 2’s public key to confirm that message actually came from party 2.
+
+# Challenges
+* Can you evole a monolithic Wordpress architecture to be HA?
+* Can you design and implement hybrid DNS?
+* Can you use Systems Manager to keep EC2 instances patched?
+* Can you design a serverless application?
+* Do you understand how to set up web identity federation? Understand the differences between user pools and identity pools?
+* Can you implement a VPN that connects on-prem and AWS networks?
+* Can you set up VPC routing between 
+ * A VPC in one region containing two subnets, A and B
+ * Two other VPCs that have the same CIDR range, VPC B and C
+ Such that subnet A can contact VPC-B and subnet B can contact VPC-C? What if subnet B needs to be able to route to a specific address in VPC-B? See Advanced VPC Routing part 2 for answer.
+* Draw the architecture for a Client VPN where
+ * clients should be able to connect to both private IPs on the host VPC (VPC A)
+ * clients should be able to connect to other IPs on the public internet
+ * clients should be able to connect to a second VPC, VPC-B
+ * (part 2) Say we have a second client computer on the same network. How can we snure that the first client device can connect to the second without having to (more slowly) go over the VPN?
+ * See AWS Client VPN video for solution
+* Draw a basic DX architecture that connects a single VPC to a single on premises network. After that, how can we secure the connect such that the provider running the DX location is unable to access traffic sent through the location? 
 
 # TODO: Make sure everything discusses cost where relevant
