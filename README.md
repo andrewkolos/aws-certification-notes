@@ -158,6 +158,16 @@ Notes for myself, focused on the Solutions Architect Professional Exam.
 
 ![image](https://user-images.githubusercontent.com/9027551/151606864-33b73327-32e8-4feb-aa39-a608480fc769.png)
 
+# Route53
+
+## Registers Domains
+* Creates 4 name servers that exists within AWS.
+* R53 routes a NS file within the TLD registry that points to these name servers.
+* The name servers will have a zone file containing the DNS information.
+* Only A/AAAA records can be used for naked/apex domains (e.g. amazon.com)
+* CNAME records map hosts to hosts by pointing at A records (names)
+* A hosted zone is merely a database for a domain
+
 # Advanced VPCs
 
 ## DHCP
@@ -205,6 +215,30 @@ Notes for myself, focused on the Solutions Architect Professional Exam.
 ![image](https://user-images.githubusercontent.com/9027551/151620999-1572c3c4-373c-4f06-84bd-a655171e7537.png)
 * Accelerated Site-to-Site VPN has a fixed accerlator cost plus a transfer fee. Also can only be used with TGW attachments, not VGWs.
 
+## Gateway Endpoints
+* Provide S3 and Dynamo DB access to private resources within a VPC
+* When added to a VPC, in reality a prefix list gets added to the subnets' RTs. These prefixes point to the gateway endpoint.
+* Endpoint policy can be configured to limit access.
+* Can't be used to access resources in other regions.
+* Can make a super secure bucket by adding a policy that allows access only from a specific gateway endpoint.
+
+## Interface Endpoints
+* Provide private access to AWS Public Services like Gateway Endpoints.
+* Only thing not supported is DynamoDB
+* Exist as ENIs within specific subnets, rather than just being logical associations with a VPC. Meaning they are not HA.
+ * Since these are ENIs, you can add SGs to limit network access.
+* Do not support IPv6.
+* PrivateDNS associates a private R53 hosted zone to the VPC, changing the default service DNS to resolve to the interface endpoint IP
+
+## Route 53 Endpoints
+* Accessible over VPN or DX
+* Two types
+ * Inbound = on-premises can forward to the R53 Resolver
+ * Outbound = Conditional forwarders, R53 to on-premises based on rules
+
+![image](https://user-images.githubusercontent.com/9027551/151679213-ae396dc9-2968-4d6b-9d00-fb7c5d77b818.png)
+
+
 # Transit Gateway
 * Can be attached to VPCs, VPGWs (site-to-site vpn), and DXGWs.
 * Has a route table which, by default, contains all BGP-learned and VPC routes. This means all attachments can communicate to all other attachments!
@@ -229,6 +263,27 @@ Notes for myself, focused on the Solutions Architect Professional Exam.
     * Party 2 uses party 1’s public key to generate ciphertext. Party 1 can then decrypt using its own private key.
     * Usually a single key is communicated and agreed upon using asymmetric encryption so that the connection can be switched to using symmetric encryption (part of SSL/TLS)
   * Signing - Party 2 uses its private key to sign a message. Party 1 uses Party 2’s public key to confirm that message actually came from party 2.
+
+# Storage
+
+## FSx for Windows File Server
+* Has Multi-AZ option
+* Integrates with Directory Service or Self-Managed AD
+* Accessible using VPC, Peering, VPN, and Direct Connect
+* Supports de-duplication, KMS at-rest encryption and enforced encryption in-transit
+* VSS - User-Driven Restores
+* Native file system accessible over SMB
+
+## FSx for Lustre
+* Designed for high-performance workloads
+* Designed for LINUX clients (POSIX)
+* Types:
+ * Scratch for maximum speed, but no reliable persistance or HA
+ * Persistent. HA in one AZ
+* Baseline performance is based on size.
+
+## EFS
+* Has a mount target in each AZ
 
 # Challenges
 * Can you evole a monolithic Wordpress architecture to be HA?
