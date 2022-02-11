@@ -2,7 +2,7 @@
 
 Notes for myself, focused on the Solutions Architect Professional Exam.
 
-# Table of Contents
+# Table of Contents (not necessarily up-to-date)
 - [aws-certification-notes](#aws-certification-notes)
 - [AWS Accounts](#aws-accounts)
   * [Budgets](#budgets)
@@ -283,7 +283,19 @@ Notes for myself, focused on the Solutions Architect Professional Exam.
 * Baseline performance is based on size.
 
 ## EFS
-* Has a mount target in each AZ
+* Does not support Windows
+* Can control access using POSIX permissions
+* AWS DataSync makes it faster and simpler to move data between on-prem
+* Can schedule automatic incremental backups
+* To access within a VPC, create mount targets for each AZ
+* Supports encryption at transit and at rest (can be enforced via config)
+
+## S3
+* Lifecycle rules can both transition and expire objects
+* There is usually a minimum amount of time that an object must reside within a tier before being transitioned.
+* By default, replicated objects are owned by the source account. The configuration for this is defined on the destination bucket.
+* Replication is not retroactive and versioning needs to be turned on in both buckets
+* Replication does not affect Glacier objects nor items moved by lifecycle events.
 
 # Challenges
 * Can you evole a monolithic Wordpress architecture to be HA?
