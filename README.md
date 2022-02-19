@@ -266,6 +266,9 @@ Notes for myself, focused on the Solutions Architect Professional Exam.
 
 # Storage
 
+## General
+* GP storage volume performance is determined by volume size.
+
 ## FSx for Windows File Server
 * Has Multi-AZ option
 * Integrates with Directory Service or Self-Managed AD
@@ -291,11 +294,14 @@ Notes for myself, focused on the Solutions Architect Professional Exam.
 * Supports encryption at transit and at rest (can be enforced via config)
 
 ## S3
-* Lifecycle rules can both transition and expire objects
+* Lifecycle rules can  both transition and expire objects
 * There is usually a minimum amount of time that an object must reside within a tier before being transitioned.
 * By default, replicated objects are owned by the source account. The configuration for this is defined on the destination bucket.
 * Replication is not retroactive and versioning needs to be turned on in both buckets
 * Replication does not affect Glacier objects nor items moved by lifecycle events.
+
+# Misc. Services
+* Guard duty provides continuous threat discovery using VPC Flow logs, Cloudtrail logs, and S3 cloudtrail logs
 
 # Challenges
 * Can you evole a monolithic Wordpress architecture to be HA?
